@@ -83,12 +83,18 @@ class ProjectDialogState extends State<ProjectDialog> {
             if (!_formKey.currentState!.validate()) return;
             final name = _nameCtrl.text;
             final desc = _descCtrl.text;
-
-            widget.bloc.add(ProjectCreated(name: name, description: desc));
-
+            if (isEdit) {
+              widget.bloc.add(
+                ProjectUpdated(
+                  widget.project!.copyWith(name: name, description: desc),
+                ),
+              );
+            } else {
+              widget.bloc.add(ProjectCreated(name: name, description: desc));
+            }
             Navigator.of(context).pop();
           },
-          child: Text("Create"),
+          child: Text(isEdit ? 'Save' : 'Create'),
         ),
       ],
     );

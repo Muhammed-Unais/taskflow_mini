@@ -22,3 +22,21 @@ class ProjectCreated extends ProjectListEvent {
   @override
   List<Object?> get props => [name, description];
 }
+
+class ProjectArchived extends ProjectListEvent {
+  final String projectId;
+  const ProjectArchived(this.projectId);
+  @override
+  List<Object?> get props => [projectId];
+}
+
+class ProjectUpdated extends ProjectListEvent {
+  final Project project;
+  const ProjectUpdated(this.project);
+  @override
+  List<Object?> get props => [project];
+}
+
+class ProjectRefreshRequested extends ProjectListEvent {
+  const ProjectRefreshRequested();
+}

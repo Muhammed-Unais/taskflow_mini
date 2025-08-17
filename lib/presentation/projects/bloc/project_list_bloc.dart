@@ -12,6 +12,9 @@ class ProjectListBloc extends Bloc<ProjectListEvent, ProjectListState> {
   ProjectListBloc(this.repo) : super(const ProjectListState.initial()) {
     on<ProjectListLoaded>(_onLoaded);
     on<ProjectCreated>(_onCreate);
+    on<ProjectUpdated>(_onUpdate);
+    on<ProjectArchived>(_onArchive);
+    on<ProjectRefreshRequested>(_onRefresh);
   }
 
   Future<void> _onLoaded(
@@ -50,5 +53,36 @@ class ProjectListBloc extends Bloc<ProjectListEvent, ProjectListState> {
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
+  }
+
+  Future<void> _onArchive(
+    ProjectArchived event,
+    Emitter<ProjectListState> emit,
+  ) async {
+    try {
+      await repo.archive(event.projectId);
+      add(ProjectListLoaded(includeArchived: state.includeArchived));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdate(
+    ProjectUpdated event,
+    Emitter<ProjectListState> emit,
+  ) async {
+    try {
+      await repo.update(event.project);
+      add(ProjectListLoaded(includeArchived: state.includeArchived));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  Future<void> _onRefresh(
+    ProjectRefreshRequested event,
+    Emitter<ProjectListState> emit,
+  ) async {
+    add(ProjectListLoaded(includeArchived: state.includeArchived));
   }
 }

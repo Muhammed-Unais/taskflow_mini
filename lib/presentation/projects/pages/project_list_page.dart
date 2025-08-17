@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
 import 'package:taskflow_mini/data/datasources/project_local_data_source.dart';
 import 'package:taskflow_mini/data/repositories/project_repository_imp.dart';
+import 'package:taskflow_mini/domain/entities/project.dart';
 import 'package:taskflow_mini/presentation/projects/bloc/project_list_bloc.dart';
 import 'package:taskflow_mini/presentation/projects/widgets/empty_view.dart';
 import 'package:taskflow_mini/presentation/projects/widgets/error_view.dart';
@@ -36,6 +37,20 @@ class _ProjectListView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Projects', style: context.textTheme.displayLarge),
+        actions: [
+          BlocBuilder<ProjectListBloc, ProjectListState>(
+            builder: (context, state) {
+              return Switch.adaptive(
+                value: state.includeArchived,
+                onChanged:
+                    (v) => context.read<ProjectListBloc>().add(
+                      ProjectListLoaded(includeArchived: v),
+                    ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateDialog(context),
@@ -60,10 +75,20 @@ class _ProjectListView extends StatelessWidget {
             case ProjectListStatus.empty:
               return EmptyView(onCreate: () => _showCreateDialog(context));
             case ProjectListStatus.error:
-              return ErrorView(onRetry: () {});
+              return ErrorView(
+                onRetry: () {
+                  context.read<ProjectListBloc>().add(
+                    ProjectRefreshRequested(),
+                  );
+                },
+              );
             case ProjectListStatus.ready:
               return RefreshIndicator(
-                onRefresh: () async {},
+                onRefresh: () async {
+                  context.read<ProjectListBloc>().add(
+                    const ProjectRefreshRequested(),
+                  );
+                },
                 child: ListView.builder(
                   padding: const EdgeInsets.only(bottom: 96),
                   itemCount: state.projects.length,
@@ -71,8 +96,12 @@ class _ProjectListView extends StatelessWidget {
                     final project = state.projects[index];
                     return ProjectCard(
                       project: project,
-                      onArchive: () {},
-                      onEdit: () => _showEditDialog(context),
+                      onArchive: () {
+                        context.read<ProjectListBloc>().add(
+                          ProjectArchived(project.id),
+                        );
+                      },
+                      onEdit: () => _showEditDialog(context, project),
                     );
                   },
                 ),
@@ -90,10 +119,14 @@ class _ProjectListView extends StatelessWidget {
     );
   }
 
-  void _showEditDialog(BuildContext context) {
+  void _showEditDialog(BuildContext context, Project project) {
     showDialog(
       context: context,
-      builder: (_) => ProjectDialog(bloc: context.read<ProjectListBloc>()),
+      builder:
+          (_) => ProjectDialog(
+            bloc: context.read<ProjectListBloc>(),
+            project: project,
+          ),
     );
   }
 }
