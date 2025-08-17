@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taskflow_mini/core/theme/theme.dart';
-import 'package:taskflow_mini/presentation/projects/pages/project_list_list.dart';
+import 'package:taskflow_mini/presentation/projects/pages/project_list_page.dart';
 
 void main() {
   runApp(const MyApp());

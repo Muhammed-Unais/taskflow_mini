@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:taskflow_mini/domain/entities/project.dart';
 
 class ProjectCard extends StatelessWidget {
   final VoidCallback onArchive;
   final VoidCallback onEdit;
+  final Project project;
 
-  const ProjectCard({super.key, required this.onArchive, required this.onEdit});
+  const ProjectCard({
+    super.key,
+    required this.onArchive,
+    required this.onEdit,
+    required this.project,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -12,11 +19,11 @@ class ProjectCard extends StatelessWidget {
     return Card(
       child: ListTile(
         title: Text(
-          "project name",
+          project.name,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          " project description",
+          project.description.isEmpty ? 'No description' : project.description,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
