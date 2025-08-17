@@ -5,4 +5,5 @@ extension MediaQueryValues on BuildContext {
   double get mediaQueryWidth => MediaQuery.sizeOf(this).width;
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
   TextTheme get textTheme => Theme.of(this).textTheme;
+  ThemeData get theme => Theme.of(this);
 }
