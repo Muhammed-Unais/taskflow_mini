@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:taskflow_mini/domain/entities/project.dart';
-import 'package:taskflow_mini/presentation/tasks/widgets/task_dialog.dart';
-import 'package:taskflow_mini/presentation/tasks/widgets/task_tile.dart';
+import 'package:taskflow_mini/domain/entities/task.dart';
+import 'package:taskflow_mini/domain/entities/task_priority.dart';
+import 'package:taskflow_mini/domain/entities/task_status.dart';
+import 'package:taskflow_mini/presentation/tasks/widgets/task_card.dart';
 
 class ProjectTasksView extends StatefulWidget {
   final Project project;
@@ -95,7 +98,23 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
               padding: const EdgeInsets.only(bottom: 96),
               itemCount: 2,
               itemBuilder: (ctx, i) {
-                return TaskTile(
+                return TaskCard(
+                  task: Task(
+                    id: '',
+                    projectId: '',
+                    title: 'Task $i',
+                    description:
+                        'New tech world can say everything in the future',
+                    status: TaskStatus.inProgress,
+                    priority: TaskPriority.low,
+                    startDate: DateTime.now(),
+                    dueDate: DateTime.now(),
+                    estimateHours: 0,
+                    timeSpentHours: 0,
+                    // labels: ["l1", "l2", "l3"],
+                    // assignees: ["u_staff1", "u_staff2", "u_admin"],
+                    archived: false,
+                  ),
                   onToggleStatus: () {},
                   onEdit: () {},
                   onDelete: () {},
@@ -107,16 +126,11 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCreateDialog(context),
+        onPressed: () {
+          context.push('/projects/${widget.project.id}/create-task');
+        },
         child: const Icon(Icons.add),
       ),
-    );
-  }
-
-  void _showCreateDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => TaskDialog(projectId: widget.project.id),
     );
   }
 }

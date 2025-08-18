@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taskflow_mini/core/router/app_router.dart';
 import 'package:taskflow_mini/core/theme/theme.dart';
 import 'package:taskflow_mini/data/datasources/project_local_data_source.dart';
+import 'package:taskflow_mini/data/datasources/user_local_data_source.dart';
+import 'package:taskflow_mini/data/repositories/auth_repository_impl.dart';
 import 'package:taskflow_mini/data/repositories/project_repository_imp.dart';
+import 'package:taskflow_mini/presentation/auth/bloc/auth_bloc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,13 +22,27 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(
           create: (_) => ProjectRepositoryImpl(ProjectLocalDataSource()),
         ),
+        RepositoryProvider(
+          create: (_) => AuthRepositoryImpl(UserLocalDataSource()),
+        ),
       ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        title: 'taskflow_mini',
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
-        routerConfig: appRouter,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create:
+                (ctx) =>
+                    AuthBloc(authRepository: ctx.read<AuthRepositoryImpl>())
+                      ..add(AuthLoad()),
+          ),
+        ],
+
+        child: MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: 'taskflow_mini',
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          routerConfig: appRouter,
+        ),
       ),
     );
   }

@@ -3,12 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taskflow_mini/data/repositories/project_repository_imp.dart';
 import 'package:taskflow_mini/domain/entities/project.dart';
+import 'package:taskflow_mini/presentation/auth/page/user_selection_screen.dart';
 import 'package:taskflow_mini/presentation/projects/pages/project_list_page.dart';
 import 'package:taskflow_mini/presentation/tasks/page/project_task_page.dart';
+import 'package:taskflow_mini/presentation/tasks/page/task_creation_screen.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/projects',
+  initialLocation: '/select-user',
   routes: [
+    GoRoute(
+      path: '/select-user',
+      builder: (context, state) => const UserSelectionScreen(),
+    ),
     GoRoute(
       path: '/projects',
       name: 'projects',
@@ -41,6 +47,13 @@ final appRouter = GoRouter(
           },
         );
       },
+    ),
+    GoRoute(
+      path: "/projects/:id/create-task",
+      name: 'createTask',
+      builder:
+          (context, state) =>
+              TaskCreationScreen(projectId: state.pathParameters['id']!),
     ),
   ],
 
