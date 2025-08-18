@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:taskflow_mini/data/repositories/project_repository_imp.dart';
-import 'package:taskflow_mini/domain/entities/project.dart';
-import 'package:taskflow_mini/presentation/auth/page/user_selection_screen.dart';
-import 'package:taskflow_mini/presentation/projects/pages/project_list_page.dart';
-import 'package:taskflow_mini/presentation/tasks/page/project_task_page.dart';
-import 'package:taskflow_mini/presentation/tasks/page/task_creation_screen.dart';
+import 'package:taskflow_mini/src/projects/data/repositories/project_repository_imp.dart';
+import 'package:taskflow_mini/src/projects/domain/entities/project.dart';
+import 'package:taskflow_mini/src/auth/presentation/page/user_selection_screen.dart';
+import 'package:taskflow_mini/src/projects/presentation/pages/project_list_page.dart';
+import 'package:taskflow_mini/src/tasks/presentation/page/project_task_page.dart';
+import 'package:taskflow_mini/src/tasks/presentation/page/task_creation_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/select-user',
