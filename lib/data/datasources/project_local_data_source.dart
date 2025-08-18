@@ -80,6 +80,18 @@ class ProjectLocalDataSource {
     await Future.delayed(_latency);
     final idx = _projects.indexWhere((p) => p.id == projectId);
     if (idx == -1) throw StateError('Project not found.');
-    _projects[idx] = _projects[idx].copyWith(archived: true);
+    _projects[idx] = _projects[idx].copyWith(
+      archived: !_projects[idx].archived,
+    );
+  }
+
+  Future<Project?> fetchById(String id) async {
+    await _ensureInit();
+    await Future.delayed(_latency);
+    try {
+      return _projects.firstWhere((p) => p.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 }

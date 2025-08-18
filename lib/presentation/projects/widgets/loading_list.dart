@@ -7,7 +7,7 @@ class LoadingList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 96),
-      itemCount: 6,
+      itemCount: 3,
       itemBuilder: (_, __) => const _LoadingTile(),
     );
   }
@@ -19,10 +19,18 @@ class _LoadingTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: _shimmerBox(height: 16, width: 180, context: context),
+        title: _shimmerBox(
+          height: 16,
+          width: context.mediaQueryWidth * 0.5,
+          context: context,
+        ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 8.0),
-          child: _shimmerBox(height: 14, width: 260, context: context),
+          child: _shimmerBox(
+            height: 14,
+            width: context.mediaQueryWidth * 0.7,
+            context: context,
+          ),
         ),
       ),
     );
@@ -37,12 +45,8 @@ class _LoadingTile extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: context.colorScheme.surface.withValues(
-          red: 200,
-          green: 200,
-          blue: 200,
-        ),
         borderRadius: BorderRadius.circular(6),
+        color: Colors.grey.shade600,
       ),
     );
   }

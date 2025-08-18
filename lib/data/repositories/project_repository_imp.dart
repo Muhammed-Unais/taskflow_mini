@@ -26,4 +26,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
   Future<void> archive(String projectId) {
     return local.archive(projectId);
   }
+
+  @override
+  Future<Project?> fetchById(String id) {
+    return local.fetchById(id);
+  }
 }

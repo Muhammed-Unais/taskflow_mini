@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:taskflow_mini/domain/entities/project.dart';
 
 class ProjectCard extends StatelessWidget {
@@ -38,11 +39,18 @@ class ProjectCard extends StatelessWidget {
             IconButton(
               tooltip: 'Archive',
               onPressed: onArchive,
-              icon: Icon(Icons.archive_outlined, color: scheme.primary),
+              icon: Icon(
+                project.archived
+                    ? Icons.unarchive_outlined
+                    : Icons.archive_outlined,
+                color: scheme.primary,
+              ),
             ),
           ],
         ),
-        onTap: () {},
+        onTap: () {
+          context.push('/projects/${project.id}');
+        },
       ),
     );
   }

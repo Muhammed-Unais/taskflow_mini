@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
-import 'package:taskflow_mini/data/datasources/project_local_data_source.dart';
 import 'package:taskflow_mini/data/repositories/project_repository_imp.dart';
 import 'package:taskflow_mini/domain/entities/project.dart';
 import 'package:taskflow_mini/presentation/projects/bloc/project_list_bloc.dart';
@@ -16,15 +15,12 @@ class ProjectListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (_) => ProjectRepositoryImpl(ProjectLocalDataSource()),
-      child: BlocProvider(
-        create:
-            (ctx) =>
-                ProjectListBloc(ctx.read<ProjectRepositoryImpl>())
-                  ..add(const ProjectListLoaded()),
-        child: const _ProjectListView(),
-      ),
+    return BlocProvider(
+      create:
+          (ctx) =>
+              ProjectListBloc(ctx.read<ProjectRepositoryImpl>())
+                ..add(const ProjectListLoaded()),
+      child: const _ProjectListView(),
     );
   }
 }
