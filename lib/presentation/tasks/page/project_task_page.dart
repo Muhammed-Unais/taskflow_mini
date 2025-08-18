@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taskflow_mini/domain/entities/project.dart';
+import 'package:taskflow_mini/presentation/tasks/widgets/task_dialog.dart';
 import 'package:taskflow_mini/presentation/tasks/widgets/task_tile.dart';
 
 class ProjectTasksView extends StatefulWidget {
@@ -106,9 +107,16 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => _showCreateDialog(context),
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  void _showCreateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => TaskDialog(projectId: widget.project.id),
     );
   }
 }
