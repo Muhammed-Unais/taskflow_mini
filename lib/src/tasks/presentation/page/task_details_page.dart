@@ -1,15 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
+import 'package:taskflow_mini/core/theme/app_pallete.dart';
+import 'package:taskflow_mini/core/widgets/empty_view.dart';
+import 'package:taskflow_mini/core/widgets/error_view.dart';
+import 'package:taskflow_mini/core/widgets/loading_list.dart';
+import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
+import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
+import 'package:taskflow_mini/src/tasks/data/datasources/sub_task_local_data_sources.dart';
+import 'package:taskflow_mini/src/tasks/data/repository/sub_task_repositoy_impl.dart';
+import 'package:taskflow_mini/src/tasks/domain/entities/sub_task.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
+import 'package:taskflow_mini/src/tasks/domain/entities/task_priority.dart';
+import 'package:taskflow_mini/src/tasks/domain/entities/task_status.dart';
+import 'package:taskflow_mini/src/tasks/presentation/bloc/subtask_bloc/bloc/subtask_bloc.dart';
 import 'package:taskflow_mini/src/tasks/presentation/widgets/sub_task_dialog.dart';
 
-class TaskDetailView extends StatelessWidget {
+class TaskDetailPage extends StatelessWidget {
   final Task task;
-  const TaskDetailView({super.key, required this.task});
+  const TaskDetailPage({required this.task, super.key});
 
   @override
   Widget build(BuildContext context) {
+    return RepositoryProvider(
+      create: (_) => SubtaskRepositoryImpl(SubtaskLocalDataSource()),
+      child: BlocProvider(
+        create:
+            (ctx) => SubtaskBloc(
+              repo: ctx.read<SubtaskRepositoryImpl>(),
+              taskId: task.id,
+            )..add(const SubtasksLoadRequested()),
+        child: _TaskDetailView(task: task),
+      ),
+    );
+  }
+}
+
+class _TaskDetailView extends StatelessWidget {
+  final Task task;
+  const _TaskDetailView({required this.task});
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = context.watch<AuthBloc>().state;
+    final users = (authState is AuthLoaded) ? authState.allUsers : <User>[];
+
     return Scaffold(
-      appBar: AppBar(title: Text(task.title)),
+      appBar: AppBar(
+        title: Text(task.title, style: context.textTheme.titleLarge),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateDialog(context),
         child: const Icon(Icons.add),
@@ -20,38 +59,136 @@ class TaskDetailView extends StatelessWidget {
           children: [
             Card(
               child: ListTile(
-                title: Text(
-                  task.title,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  'Priority: ${task.priority.name.toUpperCase()} • Status: ${task.status.name}',
+                title: Text(task.title, style: context.textTheme.titleLarge),
+                subtitle: Row(
+                  children: [
+                    Text(
+                      'Priority: ${task.priority.name.toUpperCase()}',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: task.priority.color,
+                      ),
+                    ),
+                    Text(
+                      ' • Status: ${task.status.name}',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: task.status.color,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: ListView.separated(
-                itemCount: 2,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (ctx, i) {
-                  return ListTile(
-                    leading: Checkbox(value: false, onChanged: (_) {}),
-                    title: Text("title"),
-                    subtitle: Text('Assignee'),
-                    trailing: Wrap(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined),
-                          onPressed: () => _showEditDialog(context),
+              child: BlocBuilder<SubtaskBloc, SubtaskState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case SubtaskStatusState.initial:
+                    case SubtaskStatusState.loading:
+                      return const Center(child: LoadingList());
+                    case SubtaskStatusState.empty:
+                      return Center(
+                        child: EmptyView(
+                          message: 'No subtasks found',
+                          buttonMessage: 'Create your first subtask',
+                          onCreate: () => _showCreateDialog(context),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _confirmDelete(context),
+                      );
+                    case SubtaskStatusState.error:
+                      return Center(
+                        child: ErrorView(
+                          onRetry:
+                              () => context.read<SubtaskBloc>().add(
+                                const SubtasksLoadRequested(),
+                              ),
                         ),
-                      ],
-                    ),
-                  );
+                      );
+                    case SubtaskStatusState.ready:
+                      return ListView.separated(
+                        itemCount: state.subtasks.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (ctx, i) {
+                          final s = state.subtasks[i];
+                          final assignee = users.firstWhere(
+                            (u) => u.id == s.assigneeId,
+                            orElse:
+                                () => User(
+                                  id: s.assigneeId ?? '',
+                                  name: s.assigneeId ?? 'Unassigned',
+                                  role: Role.staff,
+                                ),
+                          );
+                          return ListTile(
+                            leading:
+                                s.status != SubtaskStatus.done &&
+                                        s.status != SubtaskStatus.todo
+                                    ? const Icon(
+                                      Icons.block,
+                                      color: AppPallete.errorColor,
+                                    )
+                                    : Checkbox(
+                                      value: s.status == SubtaskStatus.done,
+                                      onChanged: (_) {
+                                        context.read<SubtaskBloc>().add(
+                                          SubtaskUpdated(
+                                            s.copyWith(
+                                              status:
+                                                  s.status == SubtaskStatus.done
+                                                      ? SubtaskStatus.todo
+                                                      : SubtaskStatus.done,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                            title: Text(s.title),
+                            subtitle:
+                                s.assigneeId != null
+                                    ? Text(
+                                      'Assignee: ${assignee.name.isEmpty ? 'Unassigned' : assignee.name}',
+                                    )
+                                    : null,
+                            trailing: Wrap(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit_outlined),
+                                  onPressed: () => _showEditDialog(context, s),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  onPressed:
+                                      () => _confirmDelete(context, s.id),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.flag_circle),
+                                  tooltip: "Change Status",
+                                  onPressed: () async {
+                                    final newStatus =
+                                        await showModalBottomSheet<
+                                          SubtaskStatus
+                                        >(
+                                          context: context,
+                                          builder:
+                                              (context) =>
+                                                  SubTaskStatusSelectorSheet(
+                                                    current: s.status,
+                                                  ),
+                                        );
+                                    if (newStatus != null && context.mounted) {
+                                      context.read<SubtaskBloc>().add(
+                                        SubtaskUpdated(
+                                          s.copyWith(status: newStatus),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                  }
                 },
               ),
             ),
@@ -64,23 +201,32 @@ class TaskDetailView extends StatelessWidget {
   void _showCreateDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (_) => SubtaskDialog(taskId: task.id),
+      builder:
+          (_) => SubtaskDialog(
+            taskId: task.id,
+            subtaskBloc: context.read<SubtaskBloc>(),
+          ),
     );
   }
 
-  void _showEditDialog(BuildContext context) {
+  void _showEditDialog(BuildContext context, Subtask s) {
     showDialog(
       context: context,
-      builder: (_) => SubtaskDialog(taskId: task.id),
+      builder:
+          (_) => SubtaskDialog(
+            taskId: task.id,
+            subtask: s,
+            subtaskBloc: context.read<SubtaskBloc>(),
+          ),
     );
   }
 
-  void _confirmDelete(BuildContext context) {
+  void _confirmDelete(BuildContext context, String id) {
     showDialog(
       context: context,
       builder:
           (_) => AlertDialog(
-            title: const Text('Delete subtask?'),
+            title: Text('Delete subtask?', style: context.textTheme.titleLarge),
             content: const Text('This action cannot be undone.'),
             actions: [
               TextButton(
@@ -89,12 +235,49 @@ class TaskDetailView extends StatelessWidget {
               ),
               FilledButton(
                 onPressed: () {
+                  context.read<SubtaskBloc>().add(SubtaskDeleted(id));
                   Navigator.of(context).pop();
                 },
                 child: const Text('Delete'),
               ),
             ],
           ),
+    );
+  }
+}
+
+class SubTaskStatusSelectorSheet extends StatelessWidget {
+  final SubtaskStatus current;
+
+  const SubTaskStatusSelectorSheet({super.key, required this.current});
+
+  @override
+  Widget build(BuildContext context) {
+    final statuses = SubtaskStatus.values;
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Change Status",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          ...statuses.map(
+            (s) => ListTile(
+              leading: CircleAvatar(radius: 8, backgroundColor: s.color),
+              title: Text(s.displayName),
+              trailing:
+                  s == current
+                      ? const Icon(Icons.check, color: Colors.green)
+                      : null,
+              onTap: () => Navigator.pop(context, s),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

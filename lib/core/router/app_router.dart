@@ -49,7 +49,7 @@ final appRouter = GoRouter(
       name: 'taskDetails',
       builder: (context, state) {
         final task = state.extra as Task;
-        return TaskDetailView(task: task);
+        return TaskDetailPage(task: task);
       },
     ),
   ],
