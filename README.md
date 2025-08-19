@@ -119,9 +119,9 @@ Both layouts preserve the repository pattern (interfaces in domain and implement
 ## Screenshots
 
 * <img width="1200" height="2670" alt="Screenshot_20250820-002321 taskflow_mini" src="https://github.com/user-attachments/assets/b88df573-7d5f-4e90-968d-78d7b59b0966" />
- (light theme)
-* <img width="1200" height="2670" alt="Screenshot_20250820-002301 taskflow_mini" src="https://github.com/user-attachments/assets/e7dd73d6-80bf-4060-b618-abba0c1c4658" />
  (dark theme)
+* <img width="1200" height="2670" alt="Screenshot_20250820-002301 taskflow_mini" src="https://github.com/user-attachments/assets/e7dd73d6-80bf-4060-b618-abba0c1c4658" />
+ (light theme)
 
 ---
 
