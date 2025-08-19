@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taskflow_mini/src/auth/presentation/page/user_selection_screen.dart';
+import 'package:taskflow_mini/src/projects/domain/entities/project.dart';
 import 'package:taskflow_mini/src/projects/presentation/pages/project_list_page.dart';
+import 'package:taskflow_mini/src/report/presentation/page/project_report_page.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
+import 'package:taskflow_mini/src/tasks/domain/repository/task_repository.dart';
 import 'package:taskflow_mini/src/tasks/presentation/bloc/task_bloc.dart';
 import 'package:taskflow_mini/src/tasks/presentation/page/project_task_page.dart';
 import 'package:taskflow_mini/src/tasks/presentation/page/task_creation_screen.dart';
@@ -50,6 +53,14 @@ final appRouter = GoRouter(
       builder: (context, state) {
         final task = state.extra as Task;
         return TaskDetailPage(task: task);
+      },
+    ),
+
+    GoRoute(
+      path: '/projects/:id/report',
+      builder: (context, state) {
+        final extra = state.extra as Project;
+        return ProjectReportPage(project: extra);
       },
     ),
   ],

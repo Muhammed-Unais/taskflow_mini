@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +8,6 @@ import 'package:taskflow_mini/core/widgets/error_view.dart';
 import 'package:taskflow_mini/core/widgets/loading_list.dart';
 import 'package:taskflow_mini/src/projects/data/repository/project_repository_imp.dart';
 import 'package:taskflow_mini/src/projects/domain/entities/project.dart';
-import 'package:taskflow_mini/src/tasks/data/datasources/task_local_data_sources.dart';
 import 'package:taskflow_mini/src/tasks/data/repository/task_repository_impl.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task_status.dart';
@@ -22,16 +20,13 @@ class ProjectTasksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (_) => TaskRepositoryImpl(TaskLocalDataSource()),
-      child: BlocProvider(
-        create:
-            (ctx) => TaskBloc(
-              repo: ctx.read<TaskRepositoryImpl>(),
-              projectId: projectId,
-            )..add(const TaskLoadRequested()),
-        child: ProjectTasksView(projectId: projectId),
-      ),
+    return BlocProvider(
+      create:
+          (ctx) => TaskBloc(
+            repo: ctx.read<TaskRepositoryImpl>(),
+            projectId: projectId,
+          )..add(const TaskLoadRequested()),
+      child: ProjectTasksView(projectId: projectId),
     );
   }
 }
@@ -82,16 +77,29 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
           appBar: AppBar(
             title: Text(project.name),
             actions: [
-              BlocBuilder<TaskBloc, TaskState>(
-                builder: (context, state) {
-                  return Switch.adaptive(
-                    value: state.includeArchived,
-                    onChanged:
-                        (v) => context.read<TaskBloc>().add(
-                          TaskLoadRequested(includeArchived: v),
-                        ),
+              IconButton(
+                tooltip: 'Report',
+                onPressed: () {
+                  context.push(
+                    '/projects/${project.id}/report',
+                    extra: project,
                   );
                 },
+                icon: const Icon(Icons.insert_chart_outlined),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: BlocBuilder<TaskBloc, TaskState>(
+                  builder: (context, state) {
+                    return Switch.adaptive(
+                      value: state.includeArchived,
+                      onChanged:
+                          (v) => context.read<TaskBloc>().add(
+                            TaskLoadRequested(includeArchived: v),
+                          ),
+                    );
+                  },
+                ),
               ),
             ],
           ),

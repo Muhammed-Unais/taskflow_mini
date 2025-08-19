@@ -7,6 +7,8 @@ import 'package:taskflow_mini/src/auth/data/data_sources/user_local_data_source.
 import 'package:taskflow_mini/src/auth/data/repository/auth_repository_impl.dart';
 import 'package:taskflow_mini/src/projects/data/repository/project_repository_imp.dart';
 import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
+import 'package:taskflow_mini/src/tasks/data/datasources/task_local_data_sources.dart';
+import 'package:taskflow_mini/src/tasks/data/repository/task_repository_impl.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,6 +26,9 @@ class MyApp extends StatelessWidget {
         ),
         RepositoryProvider(
           create: (_) => AuthRepositoryImpl(UserLocalDataSource()),
+        ),
+        RepositoryProvider(
+          create: (_) => TaskRepositoryImpl(TaskLocalDataSource()),
         ),
       ],
       child: MultiBlocProvider(
