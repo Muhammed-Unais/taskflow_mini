@@ -21,11 +21,12 @@ class EmptyView extends StatelessWidget {
           const SizedBox(height: 12),
           Text(message ?? 'Not found', style: TextStyle(fontSize: 18)),
           const SizedBox(height: 8),
-          TextButton.icon(
-            onPressed: onCreate,
-            icon: const Icon(Icons.add),
-            label: Text(buttonMessage ?? 'Create your first project'),
-          ),
+          if (buttonMessage != null)
+            TextButton.icon(
+              onPressed: onCreate,
+              icon: buttonMessage == null ? null : const Icon(Icons.add),
+              label: Text(buttonMessage!),
+            ),
         ],
       ),
     );

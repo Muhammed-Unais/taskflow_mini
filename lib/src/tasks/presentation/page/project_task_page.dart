@@ -1,11 +1,12 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
+import 'package:taskflow_mini/core/security/permission_utilities.dart';
 import 'package:taskflow_mini/core/widgets/empty_view.dart';
 import 'package:taskflow_mini/core/widgets/error_view.dart';
 import 'package:taskflow_mini/core/widgets/loading_list.dart';
+import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
 import 'package:taskflow_mini/src/projects/data/repository/project_repository_imp.dart';
 import 'package:taskflow_mini/src/projects/domain/entities/project.dart';
 import 'package:taskflow_mini/src/tasks/data/repository/task_repository_impl.dart';
@@ -59,6 +60,7 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
 
   @override
   Widget build(BuildContext context) {
+    final curentUser = (context.watch<AuthBloc>().state as AuthLoaded).user;
     return FutureBuilder<Project?>(
       future: futureProject,
       builder: (c, snap) {
@@ -125,10 +127,8 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
                     const SizedBox(width: 8),
                     BlocBuilder<TaskBloc, TaskState>(
                       builder: (context, state) {
-                        log(state.statusFilter.toString());
                         return PopupMenuButton<String>(
                           onSelected: (s) {
-                            log(s);
                             context.read<TaskBloc>().add(
                               TaskFilterChanged(statusFilter: s),
                             );
@@ -248,7 +248,10 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
                       case TaskStatusState.empty:
                         return EmptyView(
                           message: 'No tasks found',
-                          buttonMessage: 'Create your first task',
+                          buttonMessage:
+                              canCreateTask(curentUser)
+                                  ? 'Create your first task'
+                                  : null,
                           onCreate: () {
                             context.push(
                               '/projects/${project.id}/create-update-task',
@@ -308,15 +311,18 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              context.push(
-                '/projects/${project.id}/create-update-task',
-                extra: (null, context.read<TaskBloc>()),
-              );
-            },
-            child: const Icon(Icons.add),
-          ),
+          floatingActionButton:
+              canCreateTask(curentUser)
+                  ? FloatingActionButton(
+                    onPressed: () {
+                      context.push(
+                        '/projects/${project.id}/create-update-task',
+                        extra: (null, context.read<TaskBloc>()),
+                      );
+                    },
+                    child: const Icon(Icons.add),
+                  )
+                  : null,
         );
       },
     );
