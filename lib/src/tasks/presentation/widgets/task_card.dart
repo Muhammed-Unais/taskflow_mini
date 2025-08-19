@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
 import 'package:taskflow_mini/core/extensions/double_extention.dart';
 import 'package:taskflow_mini/core/security/permission_utilities.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
@@ -231,66 +232,70 @@ class _TaskCardState extends State<TaskCard> {
                           }),
                         ],
                       ),
+
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (fullEdit)
+                            IconButton(
+                              tooltip: 'Edit',
+                              onPressed: widget.onEdit,
+                              icon: const Icon(Icons.edit_outlined),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          if (canArchive)
+                            IconButton(
+                              tooltip:
+                                  widget.task.archived
+                                      ? 'Unarchive'
+                                      : 'Archive',
+                              onPressed: widget.onArchive,
+                              icon:
+                                  widget.task.archived
+                                      ? const Icon(Icons.unarchive)
+                                      : const Icon(Icons.archive_outlined),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          if (canArchive)
+                            IconButton(
+                              tooltip: 'Delete',
+                              onPressed: widget.onDelete,
+                              icon: const Icon(Icons.delete_outline),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          if (canTime)
+                            IconButton(
+                              onPressed:
+                                  () =>
+                                      _showQuickTimeEdit(context, widget.task),
+                              icon: const Icon(Icons.access_time),
+                              tooltip: 'Log time',
+                            ),
+                          if (canStatus)
+                            IconButton(
+                              icon: const Icon(Icons.flag_circle),
+                              tooltip: "Change Status",
+                              onPressed: () async {
+                                final newStatus =
+                                    await showModalBottomSheet<TaskStatus>(
+                                      context: context,
+                                      builder:
+                                          (context) => StatusSelectorSheet(
+                                            current: widget.task.status,
+                                          ),
+                                    );
+                                if (newStatus != null) {
+                                  widget.onStatusChanged?.call(newStatus);
+                                }
+                              },
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
 
                 const SizedBox(width: 8),
-
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (fullEdit)
-                      IconButton(
-                        tooltip: 'Edit',
-                        onPressed: widget.onEdit,
-                        icon: const Icon(Icons.edit_outlined),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    if (canArchive)
-                      IconButton(
-                        tooltip: widget.task.archived ? 'Unarchive' : 'Archive',
-                        onPressed: widget.onArchive,
-                        icon:
-                            widget.task.archived
-                                ? const Icon(Icons.unarchive)
-                                : const Icon(Icons.archive_outlined),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    if (canArchive)
-                      IconButton(
-                        tooltip: 'Delete',
-                        onPressed: widget.onDelete,
-                        icon: const Icon(Icons.delete_outline),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    if (canTime)
-                      IconButton(
-                        onPressed:
-                            () => _showQuickTimeEdit(context, widget.task),
-                        icon: const Icon(Icons.access_time),
-                        tooltip: 'Log time',
-                      ),
-                    if (canStatus)
-                      IconButton(
-                        icon: const Icon(Icons.flag_circle),
-                        tooltip: "Change Status",
-                        onPressed: () async {
-                          final newStatus =
-                              await showModalBottomSheet<TaskStatus>(
-                                context: context,
-                                builder:
-                                    (context) => StatusSelectorSheet(
-                                      current: widget.task.status,
-                                    ),
-                              );
-                          if (newStatus != null) {
-                            widget.onStatusChanged?.call(newStatus);
-                          }
-                        },
-                      ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -304,7 +309,10 @@ class _TaskCardState extends State<TaskCard> {
       context: ctx,
       builder:
           (_) => AlertDialog(
-            title: const Text('Add time (hours)'),
+            title: Text(
+              'Add time (hours)',
+              style: context.textTheme.titleLarge,
+            ),
             content: TextField(
               controller: _ctrl,
               keyboardType: const TextInputType.numberWithOptions(

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/sub_task.dart';
@@ -25,6 +27,7 @@ class SubtaskBloc extends Bloc<SubtaskEvent, SubtaskState> {
   ) async {
     emit(state.copyWith(status: SubtaskStatusState.loading, error: null));
     try {
+      log("SubtasksLoadRequested $taskId ${event.includeArchived}");
       final items = await repo.fetchForTask(
         taskId,
         includeArchived: event.includeArchived,

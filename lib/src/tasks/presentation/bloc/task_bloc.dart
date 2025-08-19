@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
+import 'package:taskflow_mini/src/tasks/domain/entities/task_priority.dart';
 import 'package:taskflow_mini/src/tasks/domain/repository/task_repository.dart';
 part 'task_event.dart';
 part 'task_state.dart';
@@ -86,7 +89,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     Emitter<TaskState> emit,
   ) async {
     emit(
-      state.copyWith(search: event.search, statusFilter: event.statusFilter),
+      state.copyWith(
+        search: event.search,
+        statusFilter: event.statusFilter,
+        priorities: event.priorities,
+      ),
     );
   }
 }

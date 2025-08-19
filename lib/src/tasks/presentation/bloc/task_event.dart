@@ -44,7 +44,8 @@ class TaskArchived extends TaskEvent {
 class TaskFilterChanged extends TaskEvent {
   final String? search;
   final String? statusFilter;
-  const TaskFilterChanged({this.search, this.statusFilter});
+  final Set<TaskPriority>? priorities;
+  const TaskFilterChanged({this.search, this.statusFilter, this.priorities});
   @override
-  List<Object?> get props => [search, statusFilter];
+  List<Object?> get props => [search, statusFilter, priorities];
 }

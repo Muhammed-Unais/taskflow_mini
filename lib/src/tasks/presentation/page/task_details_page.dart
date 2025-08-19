@@ -22,16 +22,13 @@ class TaskDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (_) => SubtaskRepositoryImpl(SubtaskLocalDataSource()),
-      child: BlocProvider(
-        create:
-            (ctx) => SubtaskBloc(
-              repo: ctx.read<SubtaskRepositoryImpl>(),
-              taskId: task.id,
-            )..add(const SubtasksLoadRequested()),
-        child: _TaskDetailView(task: task),
-      ),
+    return BlocProvider(
+      create:
+          (ctx) => SubtaskBloc(
+            repo: ctx.read<SubtaskRepositoryImpl>(),
+            taskId: task.id,
+          )..add(const SubtasksLoadRequested()),
+      child: _TaskDetailView(task: task),
     );
   }
 }

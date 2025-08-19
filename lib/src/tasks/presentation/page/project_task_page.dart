@@ -1,16 +1,21 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
 import 'package:taskflow_mini/core/security/permission_utilities.dart';
+import 'package:taskflow_mini/core/theme/app_pallete.dart';
+import 'package:taskflow_mini/core/utils/task_filtering.dart';
 import 'package:taskflow_mini/core/widgets/empty_view.dart';
 import 'package:taskflow_mini/core/widgets/error_view.dart';
 import 'package:taskflow_mini/core/widgets/loading_list.dart';
+import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
 import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
 import 'package:taskflow_mini/src/projects/data/repository/project_repository_imp.dart';
 import 'package:taskflow_mini/src/projects/domain/entities/project.dart';
 import 'package:taskflow_mini/src/tasks/data/repository/task_repository_impl.dart';
-import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
+import 'package:taskflow_mini/src/tasks/domain/entities/task_priority.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task_status.dart';
 import 'package:taskflow_mini/src/tasks/presentation/bloc/task_bloc.dart';
 import 'package:taskflow_mini/src/tasks/presentation/widgets/task_card.dart';
@@ -107,208 +112,49 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
           ),
           body: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchCtrl,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.search),
-                          hintText: 'Search tasks',
-                        ),
-                        onChanged:
-                            (v) => context.read<TaskBloc>().add(
-                              TaskFilterChanged(search: v.isEmpty ? null : v),
-                            ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    BlocBuilder<TaskBloc, TaskState>(
-                      builder: (context, state) {
-                        return PopupMenuButton<String>(
-                          onSelected: (s) {
-                            context.read<TaskBloc>().add(
-                              TaskFilterChanged(statusFilter: s),
-                            );
-                          },
-
-                          itemBuilder:
-                              (_) => [
-                                PopupMenuItem(
-                                  value: 'all',
-                                  child: Text(
-                                    'All status',
-                                    style: context.textTheme.bodyMedium
-                                        ?.copyWith(
-                                          color:
-                                              state.statusFilter == "all"
-                                                  ? Colors.green
-                                                  : null,
-                                        ),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: TaskStatus.todo.name,
-                                  child: Text(
-                                    TaskStatus.todo.displayName,
-                                    style: context.textTheme.bodyMedium
-                                        ?.copyWith(
-                                          color:
-                                              TaskStatus.todo.name ==
-                                                      state.statusFilter
-                                                  ? Colors.green
-                                                  : null,
-                                        ),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: TaskStatus.inProgress.name,
-                                  child: Text(
-                                    TaskStatus.inProgress.displayName,
-                                    style: context.textTheme.bodyMedium
-                                        ?.copyWith(
-                                          color:
-                                              TaskStatus.inProgress.name ==
-                                                      state.statusFilter
-                                                  ? Colors.green
-                                                  : null,
-                                        ),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: TaskStatus.blocked.name,
-                                  child: Text(
-                                    TaskStatus.blocked.displayName,
-                                    style: context.textTheme.bodyMedium
-                                        ?.copyWith(
-                                          color:
-                                              TaskStatus.blocked.name ==
-                                                      state.statusFilter
-                                                  ? Colors.green
-                                                  : null,
-                                        ),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: TaskStatus.inReview.name,
-                                  child: Text(
-                                    TaskStatus.inReview.displayName,
-                                    style: context.textTheme.bodyMedium
-                                        ?.copyWith(
-                                          color:
-                                              TaskStatus.inReview.name ==
-                                                      state.statusFilter
-                                                  ? Colors.green
-                                                  : null,
-                                        ),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: TaskStatus.done.name,
-                                  child: Text(
-                                    TaskStatus.done.displayName,
-                                    style: context.textTheme.bodyMedium
-                                        ?.copyWith(
-                                          color:
-                                              TaskStatus.done.name ==
-                                                      state.statusFilter
-                                                  ? Colors.green
-                                                  : null,
-                                        ),
-                                  ),
-                                ),
-                              ],
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12.0,
-                            ),
-                            child: Row(
-                              children: const [
-                                Icon(Icons.filter_list),
-                                SizedBox(width: 6),
-                                Text('Filter'),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
+              searchAndStatusFilter(context),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
                 child: BlocBuilder<TaskBloc, TaskState>(
                   builder: (context, state) {
-                    switch (state.status) {
-                      case TaskStatusState.loading:
-                      case TaskStatusState.initial:
-                        return const Center(child: LoadingList());
-                      case TaskStatusState.empty:
-                        return EmptyView(
-                          message: 'No tasks found',
-                          buttonMessage:
-                              canCreateTask(curentUser)
-                                  ? 'Create your first task'
-                                  : null,
-                          onCreate: () {
-                            context.push(
-                              '/projects/${project.id}/create-update-task',
-                              extra: (null, context.read<TaskBloc>()),
-                            );
-                          },
-                        );
-                      case TaskStatusState.error:
-                        return ErrorView(
-                          onRetry:
-                              () => context.read<TaskBloc>().add(
-                                const TaskLoadRequested(),
-                              ),
-                        );
-                      case TaskStatusState.ready:
-                        final filtered = _applyFilters(state);
-                        return RefreshIndicator(
-                          onRefresh:
-                              () async => context.read<TaskBloc>().add(
-                                const TaskLoadRequested(),
-                              ),
-                          child: ListView.builder(
-                            padding: const EdgeInsets.only(bottom: 96),
-                            itemCount: filtered.length,
-                            itemBuilder: (ctx, i) {
-                              final t = filtered[i];
-                              return TaskCard(
-                                onTap: () {
-                                  context.push(
-                                    '/projects/${project.id}/project-task/${t.id}',
-                                    extra: t,
-                                  );
-                                },
-                                task: t,
-                                onStatusChanged: (taskStatus) {
-                                  context.read<TaskBloc>().add(
-                                    TaskUpdated(t.copyWith(status: taskStatus)),
-                                  );
-                                },
-                                onEdit:
-                                    () => context.push(
-                                      '/projects/${project.id}/create-update-task',
-                                      extra: (t, context.read<TaskBloc>()),
-                                    ),
-                                onDelete: () => _confirmDelete(ctx, t.id),
-                                onArchive:
-                                    () => context.read<TaskBloc>().add(
-                                      TaskArchived(t.id),
-                                    ),
-                              );
-                            },
+                    return Row(
+                      spacing: 12,
+                      mainAxisAlignment: MainAxisAlignment.start,
+
+                      children: [
+                        PriorityChip(
+                          selected: state.priorities.contains(
+                            TaskPriority.high,
                           ),
-                        );
-                    }
+                          state: state,
+                          value: TaskPriority.high,
+                        ),
+                        PriorityChip(
+                          selected: state.priorities.contains(
+                            TaskPriority.medium,
+                          ),
+                          state: state,
+
+                          value: TaskPriority.medium,
+                        ),
+                        PriorityChip(
+                          selected: state.priorities.contains(TaskPriority.low),
+                          state: state,
+                          value: TaskPriority.low,
+                        ),
+                        PriorityChip(
+                          selected: state.priorities.contains(
+                            TaskPriority.critical,
+                          ),
+                          state: state,
+                          value: TaskPriority.critical,
+                        ),
+                      ],
+                    );
                   },
                 ),
               ),
+              _taskLIst(curentUser, project),
             ],
           ),
           floatingActionButton:
@@ -328,32 +174,194 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
     );
   }
 
-  List<Task> _applyFilters(TaskState state) {
-    var list = state.tasks;
-    if (state.search != null && state.search!.trim().isNotEmpty) {
-      final q = state.search!.toLowerCase();
-      list =
-          list
-              .where(
-                (t) =>
-                    t.title.toLowerCase().contains(q) ||
-                    t.description.toLowerCase().contains(q),
-              )
-              .toList();
-    } else {
-      list = state.tasks;
-    }
-    if (state.statusFilter != null) {
-      list =
-          list
-              .where(
-                (t) =>
-                    t.status.name == state.statusFilter ||
-                    state.statusFilter == "all",
-              )
-              .toList();
-    }
-    return list;
+  Expanded _taskLIst(User curentUser, Project project) {
+    return Expanded(
+      child: BlocBuilder<TaskBloc, TaskState>(
+        builder: (context, state) {
+          switch (state.status) {
+            case TaskStatusState.loading:
+            case TaskStatusState.initial:
+              return const Center(child: LoadingList());
+            case TaskStatusState.empty:
+              return EmptyView(
+                message: 'No tasks found',
+                buttonMessage:
+                    canCreateTask(curentUser) ? 'Create your first task' : null,
+                onCreate: () {
+                  context.push(
+                    '/projects/${project.id}/create-update-task',
+                    extra: (null, context.read<TaskBloc>()),
+                  );
+                },
+              );
+            case TaskStatusState.error:
+              return ErrorView(
+                onRetry:
+                    () =>
+                        context.read<TaskBloc>().add(const TaskLoadRequested()),
+              );
+            case TaskStatusState.ready:
+              final filtered = applyTaskFilter(state.tasks, state);
+              return RefreshIndicator(
+                onRefresh:
+                    () async =>
+                        context.read<TaskBloc>().add(const TaskLoadRequested()),
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 96),
+                  itemCount: filtered.length,
+                  itemBuilder: (ctx, i) {
+                    final t = filtered[i];
+                    return TaskCard(
+                      onTap: () {
+                        context.push(
+                          '/projects/${project.id}/project-task/${t.id}',
+                          extra: t,
+                        );
+                      },
+                      task: t,
+                      onStatusChanged: (taskStatus) {
+                        context.read<TaskBloc>().add(
+                          TaskUpdated(t.copyWith(status: taskStatus)),
+                        );
+                      },
+                      onEdit:
+                          () => context.push(
+                            '/projects/${project.id}/create-update-task',
+                            extra: (t, context.read<TaskBloc>()),
+                          ),
+                      onDelete: () => _confirmDelete(ctx, t.id),
+                      onArchive:
+                          () =>
+                              context.read<TaskBloc>().add(TaskArchived(t.id)),
+                    );
+                  },
+                ),
+              );
+          }
+        },
+      ),
+    );
+  }
+
+  Padding searchAndStatusFilter(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.search),
+                hintText: 'Search tasks',
+              ),
+              onChanged:
+                  (v) => context.read<TaskBloc>().add(
+                    TaskFilterChanged(search: v.isEmpty ? null : v),
+                  ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          BlocBuilder<TaskBloc, TaskState>(
+            builder: (context, state) {
+              return PopupMenuButton<String>(
+                onSelected: (s) {
+                  context.read<TaskBloc>().add(
+                    TaskFilterChanged(statusFilter: s),
+                  );
+                },
+
+                itemBuilder:
+                    (_) => [
+                      PopupMenuItem(
+                        value: 'all',
+                        child: Text(
+                          'All status',
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color:
+                                state.statusFilter == "all"
+                                    ? Colors.green
+                                    : null,
+                          ),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: TaskStatus.todo.name,
+                        child: Text(
+                          TaskStatus.todo.displayName,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color:
+                                TaskStatus.todo.name == state.statusFilter
+                                    ? Colors.green
+                                    : null,
+                          ),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: TaskStatus.inProgress.name,
+                        child: Text(
+                          TaskStatus.inProgress.displayName,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color:
+                                TaskStatus.inProgress.name == state.statusFilter
+                                    ? Colors.green
+                                    : null,
+                          ),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: TaskStatus.blocked.name,
+                        child: Text(
+                          TaskStatus.blocked.displayName,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color:
+                                TaskStatus.blocked.name == state.statusFilter
+                                    ? Colors.green
+                                    : null,
+                          ),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: TaskStatus.inReview.name,
+                        child: Text(
+                          TaskStatus.inReview.displayName,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color:
+                                TaskStatus.inReview.name == state.statusFilter
+                                    ? Colors.green
+                                    : null,
+                          ),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: TaskStatus.done.name,
+                        child: Text(
+                          TaskStatus.done.displayName,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color:
+                                TaskStatus.done.name == state.statusFilter
+                                    ? Colors.green
+                                    : null,
+                          ),
+                        ),
+                      ),
+                    ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.filter_list),
+                      SizedBox(width: 6),
+                      Text('Filter'),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   void _confirmDelete(BuildContext context, String id) {
@@ -377,6 +385,42 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
               ),
             ],
           ),
+    );
+  }
+}
+
+class PriorityChip extends StatelessWidget {
+  final TaskPriority value;
+  final TaskState state;
+  final bool selected;
+  const PriorityChip({
+    super.key,
+    required this.value,
+    required this.selected,
+    required this.state,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterChip(
+      label: Text(
+        value.displayName,
+        style: context.textTheme.bodyMedium?.copyWith(
+          color: selected ? AppPallete.greenColor : null,
+        ),
+      ),
+      selected: selected,
+      onSelected: (v) {
+        Set<TaskPriority> priorities = {...state.priorities};
+
+        if (v) {
+          priorities.add(value);
+        } else {
+          priorities.remove(value);
+        }
+
+        context.read<TaskBloc>().add(TaskFilterChanged(priorities: priorities));
+      },
     );
   }
 }

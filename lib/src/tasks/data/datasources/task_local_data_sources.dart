@@ -1,14 +1,23 @@
 import 'dart:math';
+import 'package:taskflow_mini/core/data/data_source/seed_data_source.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
 
 class TaskLocalDataSource {
   final _random = Random();
   final _latencyBase = 500;
   final List<Task> _tasks = [];
+  bool _initialized = false;
 
   Future<void> _init() async {
     await Future.delayed(Duration.zero);
     //
+    if (!SeedConfig.enabled) return;
+    if (_initialized) return;
+    await Future.delayed(Duration.zero);
+    if (_tasks.isEmpty) {
+      _tasks.addAll(SeedData.tasks());
+    }
+    _initialized = true;
   }
 
   Duration _latency() =>

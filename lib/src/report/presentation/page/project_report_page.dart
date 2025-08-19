@@ -7,8 +7,8 @@ import 'package:taskflow_mini/src/report/data/repository/report_repository_impl.
 import 'package:taskflow_mini/src/report/domain/entities/project_report.dart';
 import 'package:taskflow_mini/src/report/domain/repository/report_repository.dart';
 import 'package:taskflow_mini/src/report/presentation/bloc/report_bloc.dart';
+import 'package:taskflow_mini/src/tasks/data/repository/task_repository_impl.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task_status.dart';
-import 'package:taskflow_mini/src/tasks/domain/repository/task_repository.dart';
 
 class ProjectReportPage extends StatelessWidget {
   final Project project;
@@ -17,7 +17,7 @@ class ProjectReportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider<ReportRepository>(
-      create: (ctx) => ReportRepositoryImpl(context.read<TaskRepository>()),
+      create: (ctx) => ReportRepositoryImpl(context.read<TaskRepositoryImpl>()),
       child: BlocProvider(
         create:
             (ctx) => ReportBloc(

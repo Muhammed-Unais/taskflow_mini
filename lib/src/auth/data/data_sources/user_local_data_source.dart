@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
 
 class UserLocalDataSource {
-  final _latency = Duration(milliseconds: 550 + Random().nextInt(250));
+  final _latency = Duration(milliseconds: 250 + Random().nextInt(250));
   final List<User> _seeded = const [
     User(id: 'u_admin', name: 'Alice (Admin)', role: Role.admin),
     User(id: 'u_staff1', name: 'Bob (Staff)', role: Role.staff),

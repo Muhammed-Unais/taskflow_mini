@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
+import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
+import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
 import 'package:taskflow_mini/src/projects/data/repository/project_repository_imp.dart';
 import 'package:taskflow_mini/src/projects/domain/entities/project.dart';
 import 'package:taskflow_mini/src/projects/presentation/bloc/project_list_bloc.dart';
@@ -34,6 +37,23 @@ class _ProjectListView extends StatelessWidget {
       appBar: AppBar(
         title: Text('Projects', style: context.textTheme.displayLarge),
         actions: [
+          BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              final isAdmin =
+                  state is AuthLoaded && state.user.role == Role.admin;
+
+              return IconButton(
+                tooltip: isAdmin ? 'Change to User' : 'Change to Admin',
+                onPressed: () {
+                  context.push("/select-user");
+                },
+                icon: Icon(
+                  isAdmin ? Icons.admin_panel_settings : Icons.person,
+                  color: isAdmin ? Colors.redAccent : Colors.blueAccent,
+                ),
+              );
+            },
+          ),
           BlocBuilder<ProjectListBloc, ProjectListState>(
             builder: (context, state) {
               return Switch.adaptive(
