@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
-import 'package:taskflow_mini/src/auth/domain/repositories/auth_repositories.dart';
+import 'package:taskflow_mini/src/auth/domain/repository/auth_repositories.dart';
 part 'auth_event.dart';
 part 'auth_state.dart';
 

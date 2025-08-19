@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
-import 'package:taskflow_mini/src/projects/data/repositories/project_repository_imp.dart';
+import 'package:taskflow_mini/src/projects/data/repository/project_repository_imp.dart';
 import 'package:taskflow_mini/src/projects/domain/entities/project.dart';
 import 'package:taskflow_mini/src/projects/presentation/bloc/project_list_bloc.dart';
-import 'package:taskflow_mini/src/projects/presentation/widgets/empty_view.dart';
-import 'package:taskflow_mini/src/projects/presentation/widgets/error_view.dart';
-import 'package:taskflow_mini/src/projects/presentation/widgets/loading_list.dart';
+import 'package:taskflow_mini/core/widgets/empty_view.dart';
+import 'package:taskflow_mini/core/widgets/error_view.dart';
+import 'package:taskflow_mini/core/widgets/loading_list.dart';
 import 'package:taskflow_mini/src/projects/presentation/widgets/project_card.dart';
 import 'package:taskflow_mini/src/projects/presentation/widgets/project_dialog.dart';
 
@@ -69,7 +69,11 @@ class _ProjectListView extends StatelessWidget {
             case ProjectListStatus.initial:
               return const LoadingList();
             case ProjectListStatus.empty:
-              return EmptyView(onCreate: () => _showCreateDialog(context));
+              return EmptyView(
+                onCreate: () => _showCreateDialog(context),
+                buttonMessage: 'Create your first project',
+                message: "No projects found",
+              );
             case ProjectListStatus.error:
               return ErrorView(
                 onRetry: () {

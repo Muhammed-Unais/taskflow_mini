@@ -12,7 +12,7 @@ typedef VoidStringCallback = void Function(String id);
 class TaskCard extends StatefulWidget {
   final Task task;
   final VoidCallback? onTap;
-  final VoidCallback? onToggleStatus;
+  final void Function(TaskStatus)? onStatusChanged;
   final VoidCallback? onEdit;
   final VoidCallback? onArchive;
   final VoidCallback? onDelete;
@@ -21,7 +21,7 @@ class TaskCard extends StatefulWidget {
     super.key,
     required this.task,
     this.onTap,
-    this.onToggleStatus,
+    this.onStatusChanged,
     this.onEdit,
     this.onArchive,
     this.onDelete,
@@ -118,7 +118,7 @@ class _TaskCardState extends State<TaskCard> {
                           secondChild: Text(
                             widget.task.description,
                             style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: Colors.grey[800]),
+                                ?.copyWith(color: Colors.grey[700]),
                           ),
                           crossFadeState:
                               _expanded
@@ -233,9 +233,12 @@ class _TaskCardState extends State<TaskCard> {
                       visualDensity: VisualDensity.compact,
                     ),
                     IconButton(
-                      tooltip: 'Archive',
+                      tooltip: widget.task.archived ? 'Unarchive' : 'Archive',
                       onPressed: widget.onArchive,
-                      icon: const Icon(Icons.archive_outlined),
+                      icon:
+                          widget.task.archived
+                              ? const Icon(Icons.unarchive)
+                              : const Icon(Icons.archive_outlined),
                       visualDensity: VisualDensity.compact,
                     ),
                     IconButton(
@@ -257,7 +260,7 @@ class _TaskCardState extends State<TaskCard> {
                                   ),
                             );
                         if (newStatus != null) {
-                          widget.onToggleStatus!();
+                          widget.onStatusChanged?.call(newStatus);
                         }
                       },
                     ),

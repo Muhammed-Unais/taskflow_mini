@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:taskflow_mini/src/projects/domain/entities/project.dart';
-import 'package:taskflow_mini/src/projects/domain/repositories/project_repository.dart';
+import 'package:taskflow_mini/src/projects/domain/repository/project_repository.dart';
 
 part 'project_list_event.dart';
 part 'project_list_state.dart';

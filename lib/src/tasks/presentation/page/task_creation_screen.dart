@@ -1,19 +1,24 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
 import 'package:taskflow_mini/core/extensions/double_extention.dart';
-import 'package:taskflow_mini/core/theme/app_pallete.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task_priority.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task_status.dart';
 import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
 import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
+import 'package:taskflow_mini/src/tasks/presentation/bloc/task_bloc.dart';
 
 class TaskCreationScreen extends StatefulWidget {
   final String projectId;
   final Task? task;
-  const TaskCreationScreen({super.key, required this.projectId, this.task});
+  final TaskBloc taskBloc;
+  const TaskCreationScreen({
+    super.key,
+    required this.projectId,
+    this.task,
+    required this.taskBloc,
+  });
 
   @override
   State<TaskCreationScreen> createState() => _TaskCreationScreenState();
@@ -172,8 +177,13 @@ class _TaskCreationScreenState extends State<TaskCreationScreen> {
       archived: base?.archived ?? false,
     );
 
-    log(task.toString());
-    Navigator.of(context).pop(task);
+    final bloc = widget.taskBloc;
+    if (base == null) {
+      bloc.add(TaskCreated(task));
+    } else {
+      bloc.add(TaskUpdated(task));
+    }
+    Navigator.of(context).pop();
   }
 
   Widget _buildTitleField() {
@@ -371,7 +381,10 @@ class _TaskCreationScreenState extends State<TaskCreationScreen> {
                 children: [
                   const Icon(Icons.save),
                   6.width,
-                  Text('Save task', style: context.textTheme.bodyLarge),
+                  Text(
+                    isEdit ? 'Update task' : 'Save task',
+                    style: context.textTheme.bodyLarge,
+                  ),
                 ],
               ),
             ),

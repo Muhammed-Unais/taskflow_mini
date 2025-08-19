@@ -1,6 +1,6 @@
 import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
 import 'package:taskflow_mini/src/auth/data/data_sources/user_local_data_source.dart';
-import 'package:taskflow_mini/src/auth/domain/repositories/auth_repositories.dart';
+import 'package:taskflow_mini/src/auth/domain/repository/auth_repositories.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final UserLocalDataSource local;

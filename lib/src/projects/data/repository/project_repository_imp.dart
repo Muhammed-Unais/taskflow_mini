@@ -1,6 +1,6 @@
 import 'package:taskflow_mini/src/projects/domain/entities/project.dart';
 import 'package:taskflow_mini/src/projects/data/data_sources/project_local_data_source.dart';
-import 'package:taskflow_mini/src/projects/domain/repositories/project_repository.dart';
+import 'package:taskflow_mini/src/projects/domain/repository/project_repository.dart';
 
 class ProjectRepositoryImpl implements ProjectRepository {
   final ProjectLocalDataSource local;

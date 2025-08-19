@@ -4,8 +4,8 @@ import 'package:taskflow_mini/core/router/app_router.dart';
 import 'package:taskflow_mini/core/theme/theme.dart';
 import 'package:taskflow_mini/src/projects/data/data_sources/project_local_data_source.dart';
 import 'package:taskflow_mini/src/auth/data/data_sources/user_local_data_source.dart';
-import 'package:taskflow_mini/src/auth/data/repositories/auth_repository_impl.dart';
-import 'package:taskflow_mini/src/projects/data/repositories/project_repository_imp.dart';
+import 'package:taskflow_mini/src/auth/data/repository/auth_repository_impl.dart';
+import 'package:taskflow_mini/src/projects/data/repository/project_repository_imp.dart';
 import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
 
 void main() {
