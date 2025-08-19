@@ -9,11 +9,11 @@ import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
 import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
 import 'package:taskflow_mini/src/tasks/presentation/bloc/task_bloc.dart';
 
-class TaskCreationScreen extends StatefulWidget {
+class TaskCreateUpdateScreen extends StatefulWidget {
   final String projectId;
   final Task? task;
   final TaskBloc taskBloc;
-  const TaskCreationScreen({
+  const TaskCreateUpdateScreen({
     super.key,
     required this.projectId,
     this.task,
@@ -21,10 +21,10 @@ class TaskCreationScreen extends StatefulWidget {
   });
 
   @override
-  State<TaskCreationScreen> createState() => _TaskCreationScreenState();
+  State<TaskCreateUpdateScreen> createState() => _TaskCreateUpdateScreenState();
 }
 
-class _TaskCreationScreenState extends State<TaskCreationScreen> {
+class _TaskCreateUpdateScreenState extends State<TaskCreateUpdateScreen> {
   final _formKey = GlobalKey<FormState>();
   final _title = TextEditingController();
   final _desc = TextEditingController();

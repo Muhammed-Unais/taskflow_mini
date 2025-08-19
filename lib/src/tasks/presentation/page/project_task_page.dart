@@ -243,7 +243,7 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
                           buttonMessage: 'Create your first task',
                           onCreate: () {
                             context.push(
-                              '/projects/${project.id}/create-task',
+                              '/projects/${project.id}/create-update-task',
                               extra: (null, context.read<TaskBloc>()),
                             );
                           },
@@ -268,6 +268,12 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
                             itemBuilder: (ctx, i) {
                               final t = filtered[i];
                               return TaskCard(
+                                onTap: () {
+                                  context.push(
+                                    '/projects/${project.id}/project-task/${t.id}',
+                                    extra: t,
+                                  );
+                                },
                                 task: t,
                                 onStatusChanged: (taskStatus) {
                                   context.read<TaskBloc>().add(
@@ -276,7 +282,7 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
                                 },
                                 onEdit:
                                     () => context.push(
-                                      '/projects/${project.id}/create-task',
+                                      '/projects/${project.id}/create-update-task',
                                       extra: (t, context.read<TaskBloc>()),
                                     ),
                                 onDelete: () => _confirmDelete(ctx, t.id),
@@ -297,7 +303,7 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               context.push(
-                '/projects/${project.id}/create-task',
+                '/projects/${project.id}/create-update-task',
                 extra: (null, context.read<TaskBloc>()),
               );
             },

@@ -6,6 +6,7 @@ import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
 import 'package:taskflow_mini/src/tasks/presentation/bloc/task_bloc.dart';
 import 'package:taskflow_mini/src/tasks/presentation/page/project_task_page.dart';
 import 'package:taskflow_mini/src/tasks/presentation/page/task_creation_screen.dart';
+import 'package:taskflow_mini/src/tasks/presentation/page/task_details_page.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/select-user',
@@ -21,7 +22,6 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/projects/:id',
-
       name: 'projectTasks',
       builder: (context, state) {
         final id = state.pathParameters['id']!;
@@ -30,18 +30,26 @@ final appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: "/projects/:id/create-task",
-      name: 'createTask',
+      path: "/projects/:id/create-update-task",
+      name: 'createUpdateTask',
       builder: (context, state) {
         final extraRecord = state.extra as (Task?, TaskBloc);
         final task = extraRecord.$1;
         final taskBloc = extraRecord.$2;
 
-        return TaskCreationScreen(
+        return TaskCreateUpdateScreen(
           projectId: state.pathParameters['id']!,
           task: task,
           taskBloc: taskBloc,
         );
+      },
+    ),
+    GoRoute(
+      path: "/projects/:id/project-task/:taskId",
+      name: 'taskDetails',
+      builder: (context, state) {
+        final task = state.extra as Task;
+        return TaskDetailView(task: task);
       },
     ),
   ],
