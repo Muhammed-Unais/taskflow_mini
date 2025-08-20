@@ -55,3 +55,5 @@ class TaskFilterChanged extends TaskEvent {
   @override
   List<Object?> get props => [search, statusFilter, priorities];
 }
+
+class TaskRefreshRequested extends TaskEvent {}

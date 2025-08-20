@@ -28,7 +28,6 @@ List<Task> applyTaskFilter(TaskState taskState) {
 
   final filtered =
       taskState.tasks.where((t) {
-        if (t.archived) return false;
         return matchesQuery(t) &&
             matchesStatuses(t) &&
             matchesPriorities(t) &&

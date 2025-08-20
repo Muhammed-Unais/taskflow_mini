@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
@@ -18,6 +20,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<TaskDeleted>(_onDelete);
     on<TaskArchived>(_onArchive);
     on<TaskFilterChanged>(_onFilterChanged);
+    on<TaskRefreshRequested>(_onRefresh);
   }
 
   Future<void> _onLoad(TaskLoadRequested event, Emitter<TaskState> emit) async {
@@ -27,6 +30,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         projectId,
         includeArchived: event.includeArchived,
       );
+
       emit(
         state.copyWith(
           status: tasks.isEmpty ? TaskStatusState.empty : TaskStatusState.ready,
@@ -94,5 +98,12 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         assignees: event.assignees,
       ),
     );
+  }
+
+  Future<void> _onRefresh(
+    TaskRefreshRequested event,
+    Emitter<TaskState> emit,
+  ) async {
+    add(TaskLoadRequested(includeArchived: state.includeArchived));
   }
 }
