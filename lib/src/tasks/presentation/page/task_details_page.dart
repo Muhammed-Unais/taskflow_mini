@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
 import 'package:taskflow_mini/core/theme/app_pallete.dart';
+import 'package:taskflow_mini/core/widgets/delete_dialog.dart';
 import 'package:taskflow_mini/core/widgets/empty_view.dart';
 import 'package:taskflow_mini/core/widgets/error_view.dart';
 import 'package:taskflow_mini/core/widgets/loading_list.dart';
 import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
 import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
-import 'package:taskflow_mini/src/tasks/data/datasources/sub_task_local_data_sources.dart';
 import 'package:taskflow_mini/src/tasks/data/repository/sub_task_repositoy_impl.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/sub_task.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task_priority.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task_status.dart';
 import 'package:taskflow_mini/src/tasks/presentation/bloc/subtask_bloc/bloc/subtask_bloc.dart';
-import 'package:taskflow_mini/src/tasks/presentation/widgets/sub_task_dialog.dart';
+import 'package:taskflow_mini/src/tasks/presentation/widgets/sub_task/subtask_status_selector_sheet.dart';
+import 'package:taskflow_mini/src/tasks/presentation/widgets/sub_task/sub_task_dialog.dart';
 
 class TaskDetailPage extends StatelessWidget {
   final Task task;
@@ -222,59 +223,12 @@ class _TaskDetailView extends StatelessWidget {
     showDialog(
       context: context,
       builder:
-          (_) => AlertDialog(
-            title: Text('Delete subtask?', style: context.textTheme.titleLarge),
-            content: const Text('This action cannot be undone.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  context.read<SubtaskBloc>().add(SubtaskDeleted(id));
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Delete'),
-              ),
-            ],
+          (_) => DeleteDialog(
+            onPressed: () {
+              context.read<SubtaskBloc>().add(SubtaskDeleted(id));
+              Navigator.of(context).pop();
+            },
           ),
-    );
-  }
-}
-
-class SubTaskStatusSelectorSheet extends StatelessWidget {
-  final SubtaskStatus current;
-
-  const SubTaskStatusSelectorSheet({super.key, required this.current});
-
-  @override
-  Widget build(BuildContext context) {
-    final statuses = SubtaskStatus.values;
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            "Change Status",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          ...statuses.map(
-            (s) => ListTile(
-              leading: CircleAvatar(radius: 8, backgroundColor: s.color),
-              title: Text(s.displayName),
-              trailing:
-                  s == current
-                      ? const Icon(Icons.check, color: Colors.green)
-                      : null,
-              onTap: () => Navigator.pop(context, s),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

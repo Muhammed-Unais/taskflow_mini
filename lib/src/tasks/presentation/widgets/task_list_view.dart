@@ -1,11 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taskflow_mini/core/extensions/buildcontext_extention.dart';
 import 'package:taskflow_mini/core/security/permission_utilities.dart';
 import 'package:taskflow_mini/core/utils/task_filtering.dart';
+import 'package:taskflow_mini/core/widgets/delete_dialog.dart';
 import 'package:taskflow_mini/core/widgets/empty_view.dart';
 import 'package:taskflow_mini/core/widgets/error_view.dart';
 import 'package:taskflow_mini/core/widgets/loading_list.dart';
@@ -90,22 +89,11 @@ class TaskListView extends StatelessWidget {
     showDialog(
       context: context,
       builder:
-          (_) => AlertDialog(
-            title: Text('Delete task?', style: context.textTheme.titleLarge),
-            content: const Text('This action cannot be undone.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  context.read<TaskBloc>().add(TaskDeleted(id));
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Delete'),
-              ),
-            ],
+          (_) => DeleteDialog(
+            onPressed: () {
+              context.read<TaskBloc>().add(TaskDeleted(id));
+              Navigator.of(context).pop();
+            },
           ),
     );
   }

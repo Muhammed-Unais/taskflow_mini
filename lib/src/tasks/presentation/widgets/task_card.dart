@@ -9,6 +9,9 @@ import 'package:taskflow_mini/src/tasks/domain/entities/task_status.dart';
 import 'package:taskflow_mini/src/auth/domain/enitities/user.dart';
 import 'package:taskflow_mini/src/auth/presentation/bloc/auth_bloc.dart';
 import 'package:taskflow_mini/src/tasks/presentation/bloc/task_bloc.dart';
+import 'package:taskflow_mini/src/tasks/presentation/widgets/priority_pill.dart';
+import 'package:taskflow_mini/src/tasks/presentation/widgets/status_indicator.dart';
+import 'package:taskflow_mini/src/tasks/presentation/widgets/status_selector_sheet.dart';
 
 typedef VoidStringCallback = void Function(String id);
 
@@ -342,93 +345,6 @@ class _TaskCardState extends State<TaskCard> {
               ),
             ],
           ),
-    );
-  }
-}
-
-class PriorityPill extends StatelessWidget {
-  final TaskPriority priority;
-  const PriorityPill({super.key, required this.priority});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = priority.color;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.22)),
-      ),
-      child: Text(
-        priority.displayName,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-}
-
-class StatusIndicator extends StatelessWidget {
-  final TaskStatus status;
-
-  const StatusIndicator({super.key, required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
-      decoration: BoxDecoration(
-        color: status.color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: status.color, width: 1),
-      ),
-      child: RotatedBox(
-        quarterTurns: -1,
-        child: Text(
-          status.displayName,
-          style: TextStyle(color: status.color, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
-  }
-}
-
-class StatusSelectorSheet extends StatelessWidget {
-  final TaskStatus current;
-
-  const StatusSelectorSheet({super.key, required this.current});
-
-  @override
-  Widget build(BuildContext context) {
-    final statuses = TaskStatus.values;
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            "Change Status",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          ...statuses.map(
-            (s) => ListTile(
-              leading: CircleAvatar(radius: 8, backgroundColor: s.color),
-              title: Text(s.displayName),
-              trailing:
-                  s == current
-                      ? const Icon(Icons.check, color: Colors.green)
-                      : null,
-              onTap: () => Navigator.pop(context, s),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
