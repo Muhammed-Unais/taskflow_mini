@@ -1,8 +1,8 @@
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
 import 'package:taskflow_mini/src/tasks/presentation/bloc/task_bloc.dart';
 
-List<Task> applyTaskFilter(List<Task> tasks, TaskState f) {
-  final q = f.search?.trim().toLowerCase();
+List<Task> applyTaskFilter(TaskState taskState) {
+  final q = taskState.search?.trim().toLowerCase();
 
   bool matchesQuery(Task t) {
     if (q == null) return true;
@@ -14,18 +14,25 @@ List<Task> applyTaskFilter(List<Task> tasks, TaskState f) {
   }
 
   bool matchesStatuses(Task t) =>
-      f.statusFilter == "all" ||
-      f.statusFilter == null ||
-      f.statusFilter!.isEmpty ||
-      t.status.name == f.statusFilter;
+      taskState.statusFilter == "all" ||
+      taskState.statusFilter == null ||
+      taskState.statusFilter!.isEmpty ||
+      t.status.name == taskState.statusFilter;
 
   bool matchesPriorities(Task t) =>
-      f.priorities.isEmpty || f.priorities.contains(t.priority);
+      taskState.priorities.isEmpty || taskState.priorities.contains(t.priority);
+
+  bool matchesAssignees(Task t) =>
+      taskState.assignees.isEmpty ||
+      taskState.assignees.any(t.assignees.contains);
 
   final filtered =
-      tasks.where((t) {
+      taskState.tasks.where((t) {
         if (t.archived) return false;
-        return matchesQuery(t) && matchesStatuses(t) && matchesPriorities(t);
+        return matchesQuery(t) &&
+            matchesStatuses(t) &&
+            matchesPriorities(t) &&
+            matchesAssignees(t);
       }).toList();
 
   return filtered;

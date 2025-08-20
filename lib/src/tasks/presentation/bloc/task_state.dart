@@ -10,6 +10,7 @@ class TaskState extends Equatable {
   final String? search;
   final String? statusFilter;
   final Set<TaskPriority> priorities;
+  final Set<String> assignees;
 
   const TaskState({
     required this.status,
@@ -19,6 +20,7 @@ class TaskState extends Equatable {
     required this.search,
     required this.statusFilter,
     required this.priorities,
+    required this.assignees,
   });
 
   const TaskState.initial()
@@ -28,6 +30,7 @@ class TaskState extends Equatable {
       error = null,
       search = null,
       priorities = const {},
+      assignees = const {},
       statusFilter = "all";
 
   TaskState copyWith({
@@ -38,8 +41,10 @@ class TaskState extends Equatable {
     String? search,
     String? statusFilter,
     Set<TaskPriority>? priorities,
+    Set<String>? assignees,
   }) {
     return TaskState(
+      assignees: assignees ?? this.assignees,
       priorities: priorities ?? this.priorities,
       status: status ?? this.status,
       tasks: tasks ?? this.tasks,
@@ -58,6 +63,7 @@ class TaskState extends Equatable {
     error,
     search,
     priorities,
+    assignees,
     statusFilter,
   ];
 }

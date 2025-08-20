@@ -45,7 +45,13 @@ class TaskFilterChanged extends TaskEvent {
   final String? search;
   final String? statusFilter;
   final Set<TaskPriority>? priorities;
-  const TaskFilterChanged({this.search, this.statusFilter, this.priorities});
+  final Set<String>? assignees;
+  const TaskFilterChanged({
+    this.search,
+    this.statusFilter,
+    this.priorities,
+    this.assignees,
+  });
   @override
   List<Object?> get props => [search, statusFilter, priorities];
 }

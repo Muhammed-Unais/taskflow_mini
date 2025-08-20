@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:taskflow_mini/src/tasks/domain/entities/task.dart';
@@ -93,6 +91,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         search: event.search,
         statusFilter: event.statusFilter,
         priorities: event.priorities,
+        assignees: event.assignees,
       ),
     );
   }

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -65,7 +63,9 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
 
   @override
   Widget build(BuildContext context) {
-    final curentUser = (context.watch<AuthBloc>().state as AuthLoaded).user;
+    final auth = (context.watch<AuthBloc>().state as AuthLoaded);
+    final curentUser = auth.user;
+
     return FutureBuilder<Project?>(
       future: futureProject,
       builder: (c, snap) {
@@ -110,52 +110,79 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
               ),
             ],
           ),
-          body: Column(
-            children: [
-              searchAndStatusFilter(context),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: BlocBuilder<TaskBloc, TaskState>(
-                  builder: (context, state) {
-                    return Row(
-                      spacing: 12,
-                      mainAxisAlignment: MainAxisAlignment.start,
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                searchAndStatusFilter(context),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: BlocBuilder<TaskBloc, TaskState>(
+                    builder: (context, state) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          spacing: 12,
+                          mainAxisAlignment: MainAxisAlignment.start,
 
-                      children: [
-                        PriorityChip(
-                          selected: state.priorities.contains(
-                            TaskPriority.high,
-                          ),
-                          state: state,
-                          value: TaskPriority.high,
-                        ),
-                        PriorityChip(
-                          selected: state.priorities.contains(
-                            TaskPriority.medium,
-                          ),
-                          state: state,
+                          children: [
+                            PriorityChip(
+                              selected: state.priorities.contains(
+                                TaskPriority.high,
+                              ),
+                              state: state,
+                              value: TaskPriority.high,
+                            ),
+                            PriorityChip(
+                              selected: state.priorities.contains(
+                                TaskPriority.medium,
+                              ),
+                              state: state,
 
-                          value: TaskPriority.medium,
+                              value: TaskPriority.medium,
+                            ),
+                            PriorityChip(
+                              selected: state.priorities.contains(
+                                TaskPriority.low,
+                              ),
+                              state: state,
+                              value: TaskPriority.low,
+                            ),
+                            PriorityChip(
+                              selected: state.priorities.contains(
+                                TaskPriority.critical,
+                              ),
+                              state: state,
+                              value: TaskPriority.critical,
+                            ),
+
+                            // assignees selector
+                            ActionChip(
+                              avatar: const Icon(Icons.group, size: 18),
+
+                              label: Text(
+                                "Assignees",
+                                style: context.textTheme.bodyMedium?.copyWith(
+                                  color: AppPallete.greenColor,
+                                ),
+                              ),
+                              onPressed: () {
+                                _openAssigneeSheet(
+                                  context,
+                                  auth.allUsers,
+                                  state,
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                        PriorityChip(
-                          selected: state.priorities.contains(TaskPriority.low),
-                          state: state,
-                          value: TaskPriority.low,
-                        ),
-                        PriorityChip(
-                          selected: state.priorities.contains(
-                            TaskPriority.critical,
-                          ),
-                          state: state,
-                          value: TaskPriority.critical,
-                        ),
-                      ],
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-              _taskLIst(curentUser, project),
-            ],
+                _taskLIst(curentUser, project),
+              ],
+            ),
           ),
           floatingActionButton:
               canCreateTask(curentUser)
@@ -169,6 +196,79 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
                     child: const Icon(Icons.add),
                   )
                   : null,
+        );
+      },
+    );
+  }
+
+  Future<void> _openAssigneeSheet(
+    BuildContext context,
+    List<User> users,
+    TaskState? taskState,
+  ) async {
+    final selected = Set<String>.from(taskState?.assignees ?? []);
+
+    await showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (ctx, setState) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const ListTile(title: Text('Filter by assignees')),
+                    Flexible(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children:
+                            users.map((u) {
+                              final checked = selected.contains(u.id);
+                              return CheckboxListTile(
+                                value: checked,
+                                onChanged:
+                                    (v) => setState(
+                                      () =>
+                                          v == true
+                                              ? selected.add(u.id)
+                                              : selected.remove(u.id),
+                                    ),
+                                title: Text(u.name),
+                                subtitle: Text(u.role.name),
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton(
+                          onPressed: () {
+                            context.read<TaskBloc>().add(
+                              TaskFilterChanged(assignees: selected),
+                            );
+
+                            Navigator.pop(ctx);
+                          },
+                          child: const Text('Apply'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -201,7 +301,7 @@ class ProjectTasksViewState extends State<ProjectTasksView> {
                         context.read<TaskBloc>().add(const TaskLoadRequested()),
               );
             case TaskStatusState.ready:
-              final filtered = applyTaskFilter(state.tasks, state);
+              final filtered = applyTaskFilter(state);
               return RefreshIndicator(
                 onRefresh:
                     () async =>
